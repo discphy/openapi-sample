@@ -6,6 +6,7 @@ import com.discphy.openapi.entity.User;
 import com.discphy.openapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,15 +14,18 @@ import java.util.stream.Collectors;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream().map(UserResponse::of).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public UserResponse findById(String id) {
         return UserResponse.of(userRepository.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Not found user")));
@@ -42,8 +46,6 @@ public class UserService {
         if (hasText(userRequest.getUsername())) {
             user.setUsername(userRequest.getUsername());
         }
-
-        userRepository.save(user);
     }
 
     public void delete(String id) {
